@@ -1,8 +1,5 @@
-__pycache__/
-node_modules/
-*.Rproj.user
-*.DS_Store
-venv/
+node_modules
 .git
-.gitignore
-.vscode/
+__pycache__
+*.Rproj.user
+*.Rhistory
