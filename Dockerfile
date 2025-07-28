@@ -11,9 +11,12 @@ RUN apt-get update && apt-get install -y \
     git \
     curl
 
-# Install Node.js (which includes npm)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
+# Install Node.js and npm from NodeSource (correct way)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
+
+# Optional: Verify installation
+RUN node -v && npm -v
 
 # Install Plumber
 RUN R -e "install.packages('plumber', repos='https://cloud.r-project.org/')"
