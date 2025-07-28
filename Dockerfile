@@ -1,6 +1,7 @@
 FROM ubuntu:22.04
 
-# Install system dependencies
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && apt-get install -y \
     python3 python3-pip \
     r-base \
@@ -10,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     npm
+
 
 # Install Plumber
 RUN R -e "install.packages('plumber', repos='https://cloud.r-project.org/')"
