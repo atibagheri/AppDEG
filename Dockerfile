@@ -1,3 +1,13 @@
+# ---------- Stage 1: Build React App ----------
+FROM node:18 AS react-builder
+
+WORKDIR /app
+COPY degviz/ ./degviz
+WORKDIR /app/degviz
+RUN npm install && npm run build
+
+
+# ---------- Stage 2: Final image with Python + R + Plumber + Flask ----------
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -9,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl
 
-# Step 2: R system dependencies
+# Step 2: R system libraries
 RUN apt-get install -y --no-install-recommends \
     libcurl4-openssl-dev \
     libssl-dev \
@@ -19,28 +29,20 @@ RUN apt-get install -y --no-install-recommends \
     libfribidi0 \
     libjpeg-dev
 
-# Step 3: Install Node.js and npm (robust method)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | tee /tmp/nodesource_setup.sh && \
-    bash /tmp/nodesource_setup.sh && \
-    apt-get install -y nodejs && \
-    node -v && npm -v
-
-# Step 4: Install Plumber
+# Step 3: Install Plumber
 RUN R -e "install.packages('plumber', repos='https://cloud.r-project.org/')"
 
-# Step 5: Set working dir and copy files
+# Step 4: Set working directory and copy backend
 WORKDIR /app
 COPY . .
 
-# Step 6: Install Python dependencies
+# Step 5: Install Python dependencies
 RUN pip3 install -r backend/requirements.txt
 
-# Step 7: Build React frontend
-WORKDIR /app/degviz
-RUN npm install && npm run build
+# Step 6: Copy built React files from builder
+COPY --from=react-builder /app/degviz/build /app/degviz/build
 
-# Step 8: Set up startup
-WORKDIR /app
+# Step 7: Expose ports and start
 RUN chmod +x start.sh
 EXPOSE 5050 8000
 CMD ["./start.sh"]
