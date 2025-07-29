@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl
 
-# Step 2: R and system libraries (in smaller chunk)
+# Step 2: R system dependencies
 RUN apt-get install -y --no-install-recommends \
     libcurl4-openssl-dev \
     libssl-dev \
@@ -18,29 +18,29 @@ RUN apt-get install -y --no-install-recommends \
     libharfbuzz0b \
     libfribidi0 \
     libjpeg-dev
-    
-# Install Node.js and npm from NodeSource (robust)
+
+# Step 3: Install Node.js and npm (robust method)
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | tee /tmp/nodesource_setup.sh && \
     bash /tmp/nodesource_setup.sh && \
-    apt-get install -y nodejs
+    apt-get install -y nodejs && \
+    node -v && npm -v
 
-# Optional: Verify installation
-RUN node -v && npm -v
-
-# Install Plumber
+# Step 4: Install Plumber
 RUN R -e "install.packages('plumber', repos='https://cloud.r-project.org/')"
 
+# Step 5: Set working dir and copy files
 WORKDIR /app
-
 COPY . .
 
+# Step 6: Install Python dependencies
 RUN pip3 install -r backend/requirements.txt
 
+# Step 7: Build React frontend
 WORKDIR /app/degviz
 RUN npm install && npm run build
 
-EXPOSE 5050 8000
-
+# Step 8: Set up startup
 WORKDIR /app
 RUN chmod +x start.sh
+EXPOSE 5050 8000
 CMD ["./start.sh"]
