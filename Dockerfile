@@ -2,17 +2,26 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Step 1: Base packages
 RUN apt-get update && apt-get install -y \
     python3 python3-pip \
     r-base \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libxml2-dev \
     git \
     curl
 
-# Install Node.js and npm from NodeSource (correct way)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+# Step 2: R and system libraries (in smaller chunk)
+RUN apt-get install -y --no-install-recommends \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libfreetype6 \
+    libharfbuzz0b \
+    libfribidi0 \
+    libjpeg-dev
+    
+# Install Node.js and npm from NodeSource (robust)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | tee /tmp/nodesource_setup.sh && \
+    bash /tmp/nodesource_setup.sh && \
     apt-get install -y nodejs
 
 # Optional: Verify installation
