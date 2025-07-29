@@ -1,15 +1,15 @@
-# ---------- Stage 1: Build React Frontend ----------
+
 FROM node:18 AS react-builder
 
-# 1. Set working directory to frontend
 WORKDIR /app/degviz
 
-# 2. Copy React frontend only
-COPY degviz/ ./
+# Copy React app source code
+COPY degviz/ .
 
-# 3. Install dependencies and build
+# Copy package.json into the working directory
+COPY package*.json .  # Note the dot instead of /app/
+
 RUN npm install && npm run build
-
 
 # ---------- Stage 2: Python + R Backend ----------
 FROM ubuntu:22.04
