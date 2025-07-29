@@ -1,13 +1,19 @@
-# ---------- Stage 1: Build React App ----------
+# ---------- Stage 1: Build React Frontend ----------
 FROM node:18 AS react-builder
 
 WORKDIR /app
-COPY degviz/ ./degviz
-WORKDIR /app/degviz
+
+# Copy root-level package.json and package-lock.json
+COPY package*.json ./
+
+# Copy React source code
+COPY degviz ./degviz
+
+# Install and build React
 RUN npm install && npm run build
 
 
-# ---------- Stage 2: Final image with Python + R + Plumber + Flask ----------
+# ---------- Stage 2: Python + R Backend ----------
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -32,17 +38,15 @@ RUN apt-get install -y --no-install-recommends \
 # Step 3: Install Plumber
 RUN R -e "install.packages('plumber', repos='https://cloud.r-project.org/')"
 
-# Step 4: Set working directory and copy backend
+# Step 4: Copy backend files and install Python deps
 WORKDIR /app
 COPY . .
-
-# Step 5: Install Python dependencies
 RUN pip3 install -r backend/requirements.txt
 
-# Step 6: Copy built React files from builder
-COPY --from=react-builder /app/degviz/build /app/degviz/build
+# Step 5: Copy built React app into correct location
+COPY --from=react-builder /app/build /app/degviz/build
 
-# Step 7: Expose ports and start
+# Step 6: Entrypoint
 RUN chmod +x start.sh
 EXPOSE 5050 8000
 CMD ["./start.sh"]
