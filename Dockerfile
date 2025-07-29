@@ -4,8 +4,8 @@ FROM node:18 AS react-builder
 WORKDIR /app/degviz
 
 # Copy the frontend source and package.json
-COPY degviz ./    # this includes src/, public/, etc.
-COPY package*.json ../          # move the package.json to parent
+COPY degviz ./   
+COPY package*.json ./        
 
 WORKDIR /app
 
